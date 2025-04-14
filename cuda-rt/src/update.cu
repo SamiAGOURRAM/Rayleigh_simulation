@@ -1,5 +1,6 @@
 // update.cu
 #include <cuda_runtime.h>
+#include <stdio.h> 
 #include "rt_types.hpp"
 
 // Kernel to update solution with Euler time step

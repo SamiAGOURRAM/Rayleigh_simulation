@@ -6,6 +6,7 @@
 #include <thrust/device_ptr.h>
 #include <thrust/extrema.h>
 #include <thrust/reduce.h>
+#include <stdio.h> 
 #include "rt_types.hpp"
 
 // Timer class for performance measurement

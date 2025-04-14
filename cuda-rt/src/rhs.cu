@@ -1,5 +1,6 @@
 // rhs.cu
 #include <cuda_runtime.h>
+#include <stdio.h> 
 #include "rt_types.hpp"
 
 // First derivative in x direction (central difference)

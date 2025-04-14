@@ -1,5 +1,6 @@
 // rhs_shared.cu - Optimized RHS computation using shared memory
 #include <cuda_runtime.h>
+#include <stdio.h> 
 #include "rt_types.hpp"
 
 // Kernel to compute the right-hand side of the equations using shared memory

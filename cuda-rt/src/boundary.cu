@@ -1,3 +1,4 @@
+#include <stdio.h>
 // boundary.cu
 #include <cuda_runtime.h>
 #include "rt_types.hpp"

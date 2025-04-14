@@ -1,6 +1,7 @@
 // init.cu
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
+#include <stdio.h> 
 #include "rt_types.hpp"
 
 // Kernel for initial conditions
@@ -57,18 +58,12 @@ __global__ void initICsKernel(float *d_r, float *d_ru, float *d_rv, float *d_e,
     // e = p/(γ-1) + 0.5*ρ*(u²+v²)
     d_e[idx_ij] = p / (params.gamma - 1.0f) + 0.5f * density * (v*v);
     
-    // Initialize RHS to zero
-    d_r_rhs[idx_ij] = 0.0f;
-    d_ru_rhs[idx_ij] = 0.0f;
-    d_rv_rhs[idx_ij] = 0.0f;
-    d_e_rhs[idx_ij] = 0.0f;
 }
 
 // Host function to launch initialization kernel
 void initSimulation(float *d_r, float *d_ru, float *d_rv, float *d_e,
-                  float *d_u, float *d_v, float *d_p, float *d_c,
-                  float *d_r_rhs, float *d_ru_rhs, float *d_rv_rhs, float *d_e_rhs,
-                  SimParams params) {
+    float *d_u, float *d_v, float *d_p, float *d_c,
+    SimParams params) {
     // Set up grid and block dimensions
     dim3 blockDim(16, 16);
     dim3 gridDim((params.Nx + blockDim.x - 1) / blockDim.x,

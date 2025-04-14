@@ -1,4 +1,4 @@
-// primitive.cu
+#include <stdio.h>
 #include <cuda_runtime.h>
 #include "rt_types.hpp"
 
