@@ -11,9 +11,8 @@
 
 // Forward declarations of kernel functions
 void initSimulation(float *d_r, float *d_ru, float *d_rv, float *d_e,
-                    float *d_u, float *d_v, float *d_p, float *d_c,
-                    float *d_r_rhs, float *d_ru_rhs, float *d_rv_rhs, float *d_e_rhs,
-                    SimParams params);
+    float *d_u, float *d_v, float *d_p, float *d_c,
+    SimParams params);
                     
 void applyBoundaryConditions(float *d_r, float *d_ru, float *d_rv, float *d_e,
                              SimParams params);
@@ -140,8 +139,8 @@ int main(int argc, char **argv) {
     float *h_r = new float[(params.Nx + 2) * (params.Ny + 2)];
     
     // Initialize simulation
-    initSimulation(d_r, d_ru, d_rv, d_e, d_u, d_v, d_p, d_c, 
-                   d_r_rhs, d_ru_rhs, d_rv_rhs, d_e_rhs, params);
+    initSimulation(d_r, d_ru, d_rv, d_e, d_u, d_v, d_p, d_c, params);
+
                    
     // Time stepping loop
     float t = 0.0;
