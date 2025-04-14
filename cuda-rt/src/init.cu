@@ -27,17 +27,30 @@ __global__ void initICsKernel(float *d_r, float *d_ru, float *d_rv, float *d_e,
     d_u[idx_ij] = 0.0f;
     d_ru[idx_ij] = 0.0f;
     
-    // Initialize y-velocity: v = 0 with small perturbation near interface
+    // Initialize y-velocity: v = 0 with controlled perturbation near interface
     float v = 0.0f;
     
-    // Add small perturbation near the interface
+    // Calculate horizontal distance from center
+    float center_x = params.Lx / 2.0f;
+    float distance_from_center = fabsf(x - center_x);
+    
+    // Add controlled perturbation near the interface and center of domain
     if (fabsf(y - params.Ly/2.0f) <= 0.05f) {
-        // Use cuRAND for random perturbation
-        curandState state;
-        curand_init(seed, idx_ij, 0, &state);
+        // Create a bell-shaped perturbation centered in the domain
+        float width = 0.2f * params.Lx; // Width of perturbation (20% of domain)
         
-        // Generate random number between -0.001 and 0.001
-        v = 2.0f * 0.001f * curand_uniform(&state) - 0.001f;
+        if (distance_from_center < width) {
+            // Stronger in center, weaker toward edges
+            float amplitude = 0.002f * expf(-8.0f * distance_from_center / params.Lx);
+            
+            // Downward velocity perturbation (negative)
+            // This helps initiate the dense fluid moving down in the center
+            v = -amplitude;
+            
+            // Add small single-mode sinusoidal perturbation (optional)
+            // This creates a more controlled wavelength
+            // v += -0.001f * sinf(2.0f * M_PI * x / params.Lx);
+        }
     }
     
     d_v[idx_ij] = v;
@@ -57,7 +70,6 @@ __global__ void initICsKernel(float *d_r, float *d_ru, float *d_rv, float *d_e,
     // Calculate total energy:
     // e = p/(γ-1) + 0.5*ρ*(u²+v²)
     d_e[idx_ij] = p / (params.gamma - 1.0f) + 0.5f * density * (v*v);
-    
 }
 
 // Host function to launch initialization kernel
