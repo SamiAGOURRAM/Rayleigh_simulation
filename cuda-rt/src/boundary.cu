@@ -44,37 +44,31 @@ __global__ void bcVelocityYKernel(float *d_rv, float *d_r, int Nx, int Ny) {
 }
 
 
-// Host function to apply all boundary conditions
-void applyBoundaryConditions(float *d_r, float *d_ru, float *d_rv, float *d_e,
-                          SimParams params) {
+// New function to add to boundary.cu
+void applyBoundaryToPrimitives(float *d_u, float *d_v, float *d_p, float *d_c, SimParams params) {
     int Nx = params.Nx;
     int Ny = params.Ny;
     
-    // Set up grid and block dimensions for X boundaries
+    // Set up grid and block dimensions
     dim3 blockDimX(256);
     dim3 gridDimX((Ny + blockDimX.x - 1) / blockDimX.x);
     
-    // Set up grid and block dimensions for Y boundaries
     dim3 blockDimY(256);
     dim3 gridDimY((Nx + blockDimY.x - 1) / blockDimY.x);
     
-    // MODIFIED: Apply mirror boundary conditions in X instead of periodic
-    bcPeriodicXKernel<<<gridDimX, blockDimX>>>(d_r, Nx, Ny);
-    bcPeriodicXKernel<<<gridDimX, blockDimX>>>(d_ru, Nx, Ny);
-    bcPeriodicXKernel<<<gridDimX, blockDimX>>>(d_rv, Nx, Ny);
-    bcPeriodicXKernel<<<gridDimX, blockDimX>>>(d_e, Nx, Ny);
+    // Apply periodic boundary in X for all primitive variables
+    bcPeriodicXKernel<<<gridDimX, blockDimX>>>(d_u, Nx, Ny);
+    bcPeriodicXKernel<<<gridDimX, blockDimX>>>(d_v, Nx, Ny);
+    bcPeriodicXKernel<<<gridDimX, blockDimX>>>(d_p, Nx, Ny);
+    bcPeriodicXKernel<<<gridDimX, blockDimX>>>(d_c, Nx, Ny);
     
-    // Apply mirror boundary conditions in Y
-    bcMirrorYKernel<<<gridDimY, blockDimY>>>(d_r, Nx, Ny);
-    bcMirrorYKernel<<<gridDimY, blockDimY>>>(d_ru, Nx, Ny);
-    bcMirrorYKernel<<<gridDimY, blockDimY>>>(d_e, Nx, Ny);
-    
-    // Special boundary for vertical velocity (v=0 at walls)
-    bcVelocityYKernel<<<gridDimY, blockDimY>>>(d_rv, d_r, Nx, Ny);
-    
-    // Check for errors
-    cudaError_t err = cudaGetLastError();
-    if (err != cudaSuccess) {
-        fprintf(stderr, "Error in boundary conditions: %s\n", cudaGetErrorString(err));
-    }
+    // Apply appropriate Y boundaries
+    bcMirrorYKernel<<<gridDimY, blockDimY>>>(d_u, Nx, Ny);
+    bcVelocityYKernel<<<gridDimY, blockDimY>>>(d_v, d_r, Nx, Ny); // v=0 at walls
+    bcMirrorYKernel<<<gridDimY, blockDimY>>>(d_p, Nx, Ny);
+    bcMirrorYKernel<<<gridDimY, blockDimY>>>(d_c, Nx, Ny);
 }
+
+// Then call this after computing primitive variables in main.cu
+computePrimitiveVariables(d_r, d_ru, d_rv, d_e, d_u, d_v, d_p, d_c, params);
+applyBoundaryToPrimitives(d_u, d_v, d_p, d_c, params);
