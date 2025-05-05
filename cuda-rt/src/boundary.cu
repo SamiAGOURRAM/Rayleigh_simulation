@@ -16,18 +16,6 @@ __global__ void bcPeriodicXKernel(float *d_q, int Nx, int Ny) {
     d_q[idx(Nx, j, Nx, Ny)] = d_q[idx(0, j, Nx, Ny)];
 }
 
-// NEW: Kernel for mirror X boundary condition
-__global__ void bcMirrorXKernel(float *d_q, int Nx, int Ny) {
-    int j = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    if (j >= Ny) return;
-    
-    // Left boundary: q[-1,j] = q[0,j] (mirror)
-    d_q[idx(-1, j, Nx, Ny)] = d_q[idx(0, j, Nx, Ny)];
-    
-    // Right boundary: q[Nx,j] = q[Nx-1,j] (mirror)
-    d_q[idx(Nx, j, Nx, Ny)] = d_q[idx(Nx-1, j, Nx, Ny)];
-}
 
 // Kernel for mirror Y boundary condition
 __global__ void bcMirrorYKernel(float *d_q, int Nx, int Ny) {
@@ -55,18 +43,6 @@ __global__ void bcVelocityYKernel(float *d_rv, float *d_r, int Nx, int Ny) {
     d_rv[idx(i, Ny, Nx, Ny)] = 0.0f;
 }
 
-// NEW: Special boundary for horizontal velocity at X-walls
-__global__ void bcVelocityXKernel(float *d_ru, float *d_r, int Nx, int Ny) {
-    int j = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    if (j >= Ny) return;
-    
-    // At X boundaries, u = 0, so ru = 0
-    d_ru[idx(-1, j, Nx, Ny)] = 0.0f;
-    d_ru[idx(0, j, Nx, Ny)] = 0.0f;
-    d_ru[idx(Nx-1, j, Nx, Ny)] = 0.0f;
-    d_ru[idx(Nx, j, Nx, Ny)] = 0.0f;
-}
 
 // Host function to apply all boundary conditions
 void applyBoundaryConditions(float *d_r, float *d_ru, float *d_rv, float *d_e,
@@ -83,10 +59,10 @@ void applyBoundaryConditions(float *d_r, float *d_ru, float *d_rv, float *d_e,
     dim3 gridDimY((Nx + blockDimY.x - 1) / blockDimY.x);
     
     // MODIFIED: Apply mirror boundary conditions in X instead of periodic
-    bcMirrorXKernel<<<gridDimX, blockDimX>>>(d_r, Nx, Ny);
-    bcMirrorXKernel<<<gridDimX, blockDimX>>>(d_ru, Nx, Ny);
-    bcMirrorXKernel<<<gridDimX, blockDimX>>>(d_rv, Nx, Ny);
-    bcMirrorXKernel<<<gridDimX, blockDimX>>>(d_e, Nx, Ny);
+    bcPeriodicXKernel<<<gridDimX, blockDimX>>>(d_r, Nx, Ny);
+    bcPeriodicXKernel<<<gridDimX, blockDimX>>>(d_ru, Nx, Ny);
+    bcPeriodicXKernel<<<gridDimX, blockDimX>>>(d_rv, Nx, Ny);
+    bcPeriodicXKernel<<<gridDimX, blockDimX>>>(d_e, Nx, Ny);
     
     // Apply mirror boundary conditions in Y
     bcMirrorYKernel<<<gridDimY, blockDimY>>>(d_r, Nx, Ny);
@@ -95,9 +71,6 @@ void applyBoundaryConditions(float *d_r, float *d_ru, float *d_rv, float *d_e,
     
     // Special boundary for vertical velocity (v=0 at walls)
     bcVelocityYKernel<<<gridDimY, blockDimY>>>(d_rv, d_r, Nx, Ny);
-    
-    // NEW: Apply special boundary for horizontal velocity at X-walls
-    bcVelocityXKernel<<<gridDimX, blockDimX>>>(d_ru, d_r, Nx, Ny);
     
     // Check for errors
     cudaError_t err = cudaGetLastError();
