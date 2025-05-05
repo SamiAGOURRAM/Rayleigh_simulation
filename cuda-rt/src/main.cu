@@ -20,7 +20,10 @@ void applyBoundaryConditions(float *d_r, float *d_ru, float *d_rv, float *d_e,
 void computePrimitiveVariables(float *d_r, float *d_ru, float *d_rv, float *d_e,
                                float *d_u, float *d_v, float *d_p, float *d_c,
                                SimParams params);
-                               
+// Add this with the other forward declarations in main.cu:
+void applyPrimitiveBoundaryConditions(float *d_u, float *d_v, float *d_p, float *d_c,
+    SimParams params);
+
 float computeTimeStep(float *d_u, float *d_v, float *d_c, float *d_maxWave,
                       SimParams params);
                       
