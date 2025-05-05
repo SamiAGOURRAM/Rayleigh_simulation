@@ -49,7 +49,7 @@ __global__ void initICsKernel(float *d_r, float *d_ru, float *d_rv, float *d_e,
             
             // Add small single-mode sinusoidal perturbation (optional)
             // This creates a more controlled wavelength
-            // v += -0.001f * sinf(2.0f * M_PI * x / params.Lx);
+            v += -0.001f * sinf(2.0f * M_PI * x / params.Lx);
         }
     }
     
