@@ -159,6 +159,8 @@ int main(int argc, char **argv) {
         // Calculate primitive variables
         computePrimitiveVariables(d_r, d_ru, d_rv, d_e, d_u, d_v, d_p, d_c, params);
         
+        applyPrimitiveBoundaryConditions(d_u, d_v, d_p, d_c, params);
+
         // Compute time step from CFL condition
         dt = computeTimeStep(d_u, d_v, d_c, d_maxWave, params);
         
