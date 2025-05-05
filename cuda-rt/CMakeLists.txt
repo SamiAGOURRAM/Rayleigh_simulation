@@ -25,6 +25,7 @@ set(SOURCES
     src/primitive.cu
     src/cfl.cu
     src/rhs.cu
+    src/rhs_shared.cu
     src/update.cu
 )
 
