@@ -226,9 +226,7 @@ def main():
     time_series_filename = os.path.join(output_dir, 'velocity_time_series.png')
     create_time_series_plot(vtk_files, time_series_filename)
     # Add this to the end of the main() function
-    create_animation(output_dir, frame_pattern="density_*.png", output_file="density_evolution.gif")
-    create_animation(output_dir, frame_pattern="velocity_*.png", output_file="velocity_evolution.gif")
-    
+    create_animation(output_dir, frame_pattern="density_*.png", output_file="density_evolution.gif")    
     print(f"Visualization complete! Results saved in {output_dir}")
 
 if __name__ == "__main__":
