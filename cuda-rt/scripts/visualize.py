@@ -146,6 +146,29 @@ def create_time_series_plot(vtk_files, output_filename="velocity_time_series.png
         plt.ylabel('Maximum Velocity')
         plt.savefig(output_filename, dpi=300, bbox_inches='tight')
         plt.close()
+def create_animation(output_dir, frame_pattern="density_*.png", output_file="simulation.gif"):
+    """
+    Create an animated GIF from a sequence of image files
+    """
+    import imageio
+    import glob
+    
+    # Get all frame files in sorted order
+    frames = sorted(glob.glob(os.path.join(output_dir, frame_pattern)))
+    
+    if not frames:
+        print(f"No frames found matching pattern '{frame_pattern}' in {output_dir}")
+        return
+    
+    print(f"Creating animation from {len(frames)} frames...")
+    
+    # Create GIF
+    with imageio.get_writer(os.path.join(output_dir, output_file), mode='I', duration=0.1) as writer:
+        for frame_file in frames:
+            image = imageio.imread(frame_file)
+            writer.append_data(image)
+    
+    print(f"Animation saved to {os.path.join(output_dir, output_file)}")
 
 def main():
     # Parse command-line arguments
@@ -202,6 +225,9 @@ def main():
     # Create time series plot
     time_series_filename = os.path.join(output_dir, 'velocity_time_series.png')
     create_time_series_plot(vtk_files, time_series_filename)
+    # Add this to the end of the main() function
+    create_animation(output_dir, frame_pattern="density_*.png", output_file="density_evolution.gif")
+    create_animation(output_dir, frame_pattern="velocity_*.png", output_file="velocity_evolution.gif")
     
     print(f"Visualization complete! Results saved in {output_dir}")
 

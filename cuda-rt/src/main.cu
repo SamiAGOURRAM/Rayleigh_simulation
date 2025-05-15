@@ -24,12 +24,6 @@ void computePrimitiveVariables(float *d_r, float *d_ru, float *d_rv, float *d_e,
 void applyPrimitiveBoundaryConditions(float *d_u, float *d_v, float *d_p, float *d_c,
     SimParams params);
 
-// Add this with the other forward declarations in main.cu
-void computeRightHandSideShared(float *d_r, float *d_ru, float *d_rv, float *d_e,
-    float *d_u, float *d_v, float *d_p, float *d_c,
-    float *d_r_rhs, float *d_ru_rhs, float *d_rv_rhs, float *d_e_rhs,
-    float k1, float k2, float k3, SimParams params);
-
 
 
 float computeTimeStep(float *d_u, float *d_v, float *d_c, float *d_maxWave,
@@ -181,7 +175,7 @@ int main(int argc, char **argv) {
         float k2 = 0.125f * dx2 / (2.0f * dt);   // For momentum (10× stronger)
         float k3 = 0.0125f * dx2 / (2.0f * dt);  // For energy
         
-        computeRightHandSideShared(d_r, d_ru, d_rv, d_e, d_u, d_v, d_p, d_c,
+        computeRightHandSide(d_r, d_ru, d_rv, d_e, d_u, d_v, d_p, d_c,
                                 d_r_rhs, d_ru_rhs, d_rv_rhs, d_e_rhs,
                                 k1, k2, k3, params);
         
