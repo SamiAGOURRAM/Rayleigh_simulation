@@ -182,7 +182,6 @@ int main(int argc, char **argv) {
         // Update solution
         updateSolution(d_r, d_ru, d_rv, d_e, d_r_rhs, d_ru_rhs, d_rv_rhs, d_e_rhs, dt, params);
 
-        applyBoundaryConditions(d_r, d_ru, d_rv, d_e, params);
 
 
         
